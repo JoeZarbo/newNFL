@@ -5,31 +5,9 @@ const italic = new FontFace('italic', 'url("/fonts/ARIALI.TTF")');
 const logoCache = {};
 let isBusy = false;
 
+let phase = 'normal';
+
 window.onload = start;
-
-const background = {
-    x: 426,
-    y: 1200,
-    w: 1560,
-    h: 95,
-    color: "#222",
-    draw() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.w, this.h);
-    }
-};
-
-const lf0 = {
-    x: 426,
-    y: 1200,
-    w: 95,
-    h: 95,
-    logo: "/logos/logo.png",
-    logoImg: null,
-    draw() {
-        if (this.logoImg) ctx.drawImage(this.logoImg, this.x, this.y, this.w, this.h);
-    }
-};
 
 const awayInfo = {
     x: 521,
@@ -64,25 +42,6 @@ const awayInfo = {
         ctx.font = "30px italic";
         ctx.textAlign = "right";
         ctx.fillText(this.record, this.x + this.w - 10, this.y + this.h - 10);
-    }
-};
-
-const awayScore = {
-    x: 801,
-    y: 1200,
-    w: 90,
-    h: 95,
-    prim: "#130662",
-    sec: awayInfo.sec,
-    score: 0,
-    draw() {
-        ctx.fillStyle = this.prim;
-        ctx.fillRect(this.x, this.y, this.w, this.h);
-
-        ctx.font = "60px bold";
-        ctx.textAlign = "center";
-        ctx.fillStyle = this.sec;
-        ctx.fillText(this.score.toString(), this.x + this.w / 2, this.y + this.h / 1.4);
     }
 };
 
@@ -122,90 +81,6 @@ const homeInfo = {
     }
 };
 
-const homeScore = {
-    x: 1171,
-    y: 1200,
-    w: 90,
-    h: 95,
-    prim: "#EA3E03",
-    sec: homeInfo.sec,
-    score: 0,
-    draw() {
-        ctx.fillStyle = this.prim;
-        ctx.fillRect(this.x, this.y, this.w, this.h);
-
-        ctx.font = "60px bold";
-        ctx.textAlign = "center";
-        ctx.fillStyle = this.sec;
-        ctx.fillText(this.score.toString(), this.x + this.w / 2, this.y + this.h / 1.4);
-    }
-};
-
-const quarter = {
-    x1: 1280,
-    y1: 1262,
-    x2: 1520,
-    y2: 1263,
-    x3: 1261,
-    y3: 1200,
-    w: 280,
-    h: 95,
-    qtr: "1ST",
-    clock: "13:00",
-    draw() {
-        ctx.fillStyle = "#222";
-        ctx.fillRect(this.x3, this.y3, this.w, this.h);
-
-        ctx.font = "45px bold";
-        ctx.textAlign = "left";
-        ctx.fillStyle = "#FFF";
-        ctx.fillText(this.qtr, this.x1, this.y1);
-
-        ctx.font = "50px italic";
-        ctx.textAlign = "right";
-        ctx.fillText(this.clock, this.x2, this.y2);
-    }
-};
-
-const playClock = {
-    x: 1541,
-    y: 1200,
-    w: 75,
-    h: 95,
-    color: "#333",
-    textCol: "#FFF",
-    time: "40",
-    draw() {
-        ctx.fillStyle = this.time > 5 ? "#333" : "#B30707";
-        ctx.fillRect(this.x, this.y, this.w, this.h);
-
-        ctx.font = this.time > 9 ? "55px italic" : "75px italic";
-        ctx.textAlign = "center";
-        ctx.fillStyle = this.time > 5 ? "#FFF" : "#000";
-        ctx.fillText(this.time.toString(), this.x + this.w / 2 - 2, this.time > 9 ? this.y + this.h / 1.45 : this.y + this.h / 1.3);
-    }
-};
-
-const down = {
-    x: 1616,
-    y: 1200,
-    w: 370,
-    h: 95,
-    chall: false,
-    prim: "#FB4F14",
-    sec: "#002244",
-    distance: "1ST & 10",
-    draw() {
-        ctx.fillStyle = this.prim;
-        ctx.fillRect(this.x, this.y, this.w, this.h);
-
-        ctx.font = this.chall ? "40px italic" : "50px italic";
-        ctx.textAlign = "center";
-        ctx.fillStyle = this.sec;
-        ctx.fillText(this.distance, this.x + this.w / 2, this.y + this.h / 1.5);
-    }
-}
-
 function start() {
     const fontPromises = [
         bold.load(),
@@ -220,7 +95,7 @@ function start() {
 }
 
 function preloadLogos() {
-    const imgs = [awayInfo, homeInfo, lf0];
+    const imgs = [awayInfo, homeInfo];
     return imgs.map(team => {
         return new Promise((resolve) => {
             const img = new Image();
@@ -236,13 +111,6 @@ function preloadLogos() {
 function draw() {
     bold.load();
     italic.load();
-    background.draw();
-    lf0.draw();
     awayInfo.draw();
-    awayScore.draw();
     homeInfo.draw();
-    homeScore.draw();
-    quarter.draw();
-    playClock.draw();
-    down.draw();
 }
