@@ -204,9 +204,9 @@ const awayDown = {
         ctx.font = "40px italic";
         ctx.fillStyle = this.fore;
         ctx.textAlign = "left";
-        ctx.fillText(this.down, this.x + 10, this.y + 35);
+        ctx.fillText(this.pc, this.x + 10, this.y + 35);
         ctx.textAlign = "right";
-        ctx.fillText(this.pc, this.x + 580, this.y + 35);
+        ctx.fillText(this.down, this.x + 580, this.y + 35);
         ctx.restore();
     },
     // clear and redraw only the awayDown region
@@ -386,6 +386,9 @@ const specialDown = {
             }
         }
         requestAnimationFrame(step);
+    },
+    changeText(newText) {
+        this.text = newText;
     }
 }
 
@@ -466,7 +469,12 @@ socket.onmessage = (event) => {
     console.log(receivedMessage);
 
     switch (receivedMessage.type) {
-        case "change-special":
+        case "set-kickoff":
+            specialDown.changeText("KICKOFF");
+            specialDown.changeDown();
+            break;
+        case "set-flag":
+            specialDown.changeText("FLAG");
             specialDown.changeDown();
             break;
         case "away-possession":
