@@ -67,7 +67,11 @@ const awayTimeouts = {
         ctx.save();
         ctx.globalAlpha = this.alpha;
         if (this.pos) {
-            ctx.fillStyle = this.back;
+            const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
+            grad.addColorStop(0, GetLowGradient(this.back));
+            grad.addColorStop(0.5, GetHighGradient(this.back));
+            grad.addColorStop(1, GetLowGradient(this.back));
+            ctx.fillStyle = grad;
             ctx.fillRect(this.x - 420, this.y - 7, 585, 30);
         }
         ctx.restore();
@@ -133,7 +137,11 @@ const homeTimeouts = {
         ctx.save();
         ctx.globalAlpha = this.alpha;
         if (this.pos) {
-            ctx.fillStyle = this.back;
+            const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
+            grad.addColorStop(0, GetLowGradient(this.back));
+            grad.addColorStop(0.5, GetHighGradient(this.back));
+            grad.addColorStop(1, GetLowGradient(this.back));
+            ctx.fillStyle = grad;
             ctx.fillRect(this.x - 5, this.y - 7, 585, 30);
         }
         ctx.restore();
@@ -199,7 +207,11 @@ const awayDown = {
         if (this.alpha <= 0) return;
         ctx.save();
         ctx.globalAlpha = this.alpha;
-        ctx.fillStyle = this.back;
+        const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
+        grad.addColorStop(0, GetLowGradient(this.back));
+        grad.addColorStop(0.5, GetHighGradient(this.back));
+        grad.addColorStop(1, GetLowGradient(this.back));
+        ctx.fillStyle = grad;
         ctx.fillRect(this.x, this.y, 585, 40);
         ctx.font = "40px italic";
         ctx.fillStyle = this.fore;
@@ -245,11 +257,102 @@ const awayDown = {
             } else {
                 self.alpha = targetAlpha;
                 self.animating = false;
-                if (self.alpha === 0) self.pos = false;
+                if (self.alpha === 0) {
+                    self.pos = false;
+                    self.down = "1st & 10";
+                }
             }
         }
 
         requestAnimationFrame(step);
+    },
+    changeDown(newDown, newDistance, duration = 300) {
+        if (this.animating || !this.pos) return;
+        this.animating = true;
+
+        let start = performance.now();
+        const ease = (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        const self = this;
+
+        function stepOne(now) {
+            const elapsed = now - start;
+            const t = Math.min(1, elapsed / duration);
+            const eased = ease(t);
+
+            ctx.clearRect(self.x - 2, self.y - 2, self.w + 2 * 2, self.h + 2 * 2);
+
+            ctx.fillStyle = self.back;
+            ctx.fillRect(self.x, self.y, 585, 40);
+            ctx.font = "40px italic";
+            ctx.fillStyle = self.fore;
+            ctx.textAlign = "left";
+            ctx.fillText(self.pc, self.x + 10, self.y + 35);
+
+            let newA = 1 + (0 - 1) * eased;
+            let newX = 580 + (540 - 580) * eased;
+            ctx.save();
+            ctx.globalAlpha = newA;
+            ctx.fillStyle = self.fore;
+            ctx.textAlign = "right";
+            ctx.fillText(self.down, newX + 580, self.y + 35);
+            ctx.restore();
+            awayInfo.draw();
+
+            if (t < 1) {
+                requestAnimationFrame(stepOne);
+            } else {
+                start = performance.now();
+                let comboDown;
+                if (newDistance === -1) {
+                    comboDown = `${GetDownNum(newDown)} & GOAL`;
+                } else if (newDistance === 0) {
+                    comboDown = `${GetDownNum(newDown)} & INCHES`;
+                } else if (newDistance === -2) {
+                    comboDown = `${GetDownNum(newDown)} DOWN`;
+                } else {
+                    comboDown = `${GetDownNum(newDown)} & ${newDistance}`;
+                }
+                self.down = comboDown;
+                requestAnimationFrame(stepTwo);
+            }
+        }
+
+        function stepTwo(now) {
+            const elapsed = now - start;
+            const t = Math.min(1, elapsed / duration);
+            const eased = ease(t);
+
+            ctx.clearRect(self.x - 2, self.y - 2, self.w + 2 * 2, self.h + 2 * 2);
+
+            const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
+            grad.addColorStop(0, GetLowGradient(this.back));
+            grad.addColorStop(0.5, GetHighGradient(this.back));
+            grad.addColorStop(1, GetLowGradient(this.back));
+            ctx.fillStyle = grad;
+            ctx.fillRect(self.x, self.y, 585, 40);
+            ctx.font = "40px italic";
+            ctx.fillStyle = self.fore;
+            ctx.textAlign = "left";
+            ctx.fillText(self.pc, self.x + 10, self.y + 35);
+
+            let newA = 0 + (1.0 - 0) * eased;
+            let newX = 540 + (580 - 540) * eased;
+            ctx.save();
+            ctx.globalAlpha = newA;
+            ctx.fillStyle = self.fore;
+            ctx.textAlign = "right";
+            ctx.fillText(self.down, newX + 580, self.y + 35);
+            ctx.restore();
+            awayInfo.draw();
+
+            if (t < 1) {
+                requestAnimationFrame(stepTwo);
+            } else {
+                self.animating = false;
+            }
+        }
+
+        requestAnimationFrame(stepOne);
     }
 };
 
@@ -265,9 +368,13 @@ const homeDown = {
     alpha: 0,
     draw() {
         if (this.alpha <= 0) return;
+        const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
+        grad.addColorStop(0, GetLowGradient(this.back));
+        grad.addColorStop(0.5, GetHighGradient(this.back));
+        grad.addColorStop(1, GetLowGradient(this.back));
         ctx.save();
         ctx.globalAlpha = this.alpha;
-        ctx.fillStyle = this.back;
+        ctx.fillStyle = grad;
         ctx.fillRect(this.x, this.y, 585, 40);
         ctx.font = "40px italic";
         ctx.fillStyle = this.fore;
@@ -311,11 +418,108 @@ const homeDown = {
             } else {
                 self.alpha = targetAlpha;
                 self.animating = false;
-                if (self.alpha === 0) self.pos = false;
+                if (self.alpha === 0) {
+                    self.pos = false;
+                    self.down = "1st & 10";
+                }
             }
         }
 
         requestAnimationFrame(step);
+    },
+    changeDown(newDown, newDistance, duration = 300) {
+        if (this.animating || !this.pos) return;
+        this.animating = true;
+
+        let start = performance.now();
+        const ease = (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        const self = this;
+
+        function stepOne(now) {
+            const elapsed = now - start;
+            const t = Math.min(1, elapsed / duration);
+            const eased = ease(t);
+            
+            //clear area
+            ctx.clearRect(self.x - 2, self.y - 2, self.w + 2 * 2, self.h + 2 * 2);
+
+            //draw background and play clock
+            const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
+            grad.addColorStop(0, GetLowGradient(this.back));
+            grad.addColorStop(0.5, GetHighGradient(this.back));
+            grad.addColorStop(1, GetLowGradient(this.back));
+            ctx.fillStyle = grad;
+            ctx.fillRect(self.x, self.y, 585, 40);
+            ctx.font = "40px italic";
+            ctx.fillStyle = self.fore;
+            ctx.textAlign = "right";
+            ctx.fillText(self.pc, self.x + 580, self.y + 35);
+
+            //draw down shrinking and fading away and moving to the right
+            let newA = 1 + (0 - 1) * eased;
+            let newX = 1560 + (1600 - 1560) * eased;
+            ctx.save();
+            ctx.globalAlpha = newA;
+            ctx.fillStyle = self.fore;
+            ctx.textAlign = "left";
+            ctx.fillText(self.down, newX, self.y + 35);
+            ctx.restore();
+            homeInfo.draw();
+
+            if (t < 1) {
+                requestAnimationFrame(stepOne);
+            } else {
+                start = performance.now();
+                let comboDown;
+                if (newDistance === -1) {
+                    comboDown = `${GetDownNum(newDown)} & GOAL`;
+                } else if (newDistance === -2) {
+                    comboDown = `${GetDownNum(newDown)} DOWN`;
+                } else if (newDistance === 0) {
+                    comboDown = `${GetDownNum(newDown)} & INCHES`;
+                } else {
+                    comboDown = `${GetDownNum(newDown)} & ${newDistance}`;
+                }
+                self.down = comboDown;
+                requestAnimationFrame(stepTwo);
+            }
+        }
+
+        function stepTwo(now) {
+            const elapsed = now - start;
+            const t = Math.min(1, elapsed / duration);
+            const eased = ease(t);
+
+            //clear area
+            ctx.clearRect(self.x - 2, self.y - 2, self.w + 2 * 2, self.h + 2 * 2);
+
+            //draw background and play clock
+            ctx.fillStyle = self.back;
+            ctx.fillRect(self.x, self.y, 585, 40);
+            ctx.font = "40px italic";
+            ctx.fillStyle = self.fore;
+            ctx.textAlign = "right";
+            ctx.fillText(self.pc, self.x + 580, self.y + 35);
+
+            //draw down growing and fading in and moving to the left
+            let newA = 0 + (1.0 - 0) * eased;
+            let newX = 1600 + (1560 - 1600) * eased;
+            ctx.save();
+            ctx.globalAlpha = newA;
+            ctx.fillStyle = self.fore;
+            ctx.textAlign = "left";
+            ctx.fillText(self.down, newX, self.y + 35);
+            ctx.restore();
+            homeInfo.draw();
+
+            if (t < 1) {
+                requestAnimationFrame(stepTwo);
+            } else {
+                self.animating = false;
+            }
+        }
+
+        requestAnimationFrame(stepOne);
     }
 };
 
@@ -333,7 +537,11 @@ const specialDown = {
 
         ctx.save();
         ctx.globalAlpha = this.alpha;
-        ctx.fillStyle = this.text === "FLAG" ? "#fcdf03" : this.back;
+        const grad = ctx.createLinearGradient(this.x, this.y, this.x + 365, this.y + 40);
+        grad.addColorStop(0, GetLowGradient(this.text === "FLAG" ? "#fcdf03" : this.back));
+        grad.addColorStop(0.5, GetHighGradient(this.text === "FLAG" ? "#fcdf03" : this.back));
+        grad.addColorStop(1, GetLowGradient(this.text === "FLAG" ? "#fcdf03" : this.back));
+        ctx.fillStyle = grad;
         ctx.fillRect(this.x, this.y, 365, 40);
         ctx.fillStyle = this.text === "FLAG" ? "#222" : this.fore;
         ctx.font = "40px italic";
@@ -485,5 +693,140 @@ socket.onmessage = (event) => {
             homeDown.changePos();
             homeTimeouts.changePos();
             break;
+        case "send-down":
+            if (receivedMessage.away) {
+                awayDown.changeDown(receivedMessage.down, receivedMessage.distance);
+            } else {
+                homeDown.changeDown(receivedMessage.down, receivedMessage.distance);
+            }
+            break;
     }
+}
+
+function GetDownNum(num) {
+    if (num === 1) {
+        return "1st";
+    } else if (num === 2) {
+        return "2nd";
+    } else if (num === 3) {
+        return "3rd";
+    } else {
+        return "4th";
+    }
+}
+
+function GetLowGradient(col) {
+    let finalCol = "";
+    for (const char of col) {
+        switch (char) {
+            case "#":
+                finalCol += "#";
+                break;
+            case "0":
+            case "1":
+                finalCol += "0";
+                break;
+            case "2":
+                finalCol += "1";
+                break;
+            case "3":
+                finalCol += "2";
+                break;
+            case "4":
+                finalCol += "3";
+                break;
+            case "5":
+                finalCol += "4";
+                break;
+            case "6":
+                finalCol += "5";
+                break;
+            case "7":
+                finalCol += "6";
+                break;
+            case "8":
+                finalCol += "7";
+                break;
+            case "9":
+                finalCol += "8";
+                break;
+            case "a":
+                finalCol += "9";
+                break;
+            case "b":
+                finalCol += "a";
+                break;
+            case "c":
+                finalCol += "b";
+                break;
+            case "d":
+                finalCol += "c";
+                break;
+            case "e":
+                finalCol += "d";
+                break;
+            case "f":
+                finalCol += "e";
+                break;
+        }
+    }
+    return finalCol;
+}
+
+function GetHighGradient(col) {
+    let finalCol = "";
+    for (const char of col) {
+        switch (char) {
+            case "#":
+                finalCol += "#";
+                break;
+            case "0":
+                finalCol += "1";
+                break;
+            case "1":
+                finalCol += "2";
+                break;
+            case "2":
+                finalCol += "3";
+                break;
+            case "3":
+                finalCol += "4";
+                break;
+            case "4":
+                finalCol += "5";
+                break;
+            case "5":
+                finalCol += "6";
+                break;
+            case "6":
+                finalCol += "7";
+                break;
+            case "7":
+                finalCol += "8";
+                break;
+            case "8":
+                finalCol += "9";
+                break;
+            case "9":
+                finalCol += "a";
+                break;
+            case "a":
+                finalCol += "b";
+                break;
+            case "b":
+                finalCol += "c";
+                break;
+            case "c":
+                finalCol += "d";
+                break;
+            case "d":
+                finalCol += "e";
+                break;
+            case "e":
+            case "f":
+                finalCol += "f";
+                break;
+        }
+    }
+    return finalCol;
 }
