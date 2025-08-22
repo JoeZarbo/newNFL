@@ -13,9 +13,23 @@ const awayInfo = {
     x: 575,
     y: 1000,
     logo: "/logos/away/ravens.png",
+    name: "Ravens",
     logoImg: null,
     draw() {
-        if (this.logoImg) ctx.drawImage(this.logoImg, this.x, this.y, 400, 400);
+        const test = ["Bears", "Cardinals", "Giants", "Jaguars", "Titans", "Texans"];
+        if (this.logoImg) {
+            if (test.includes(this.name)) {
+                ctx.drawImage(this.logoImg, this.x + 50, this.y + 50, 300, 300);
+            } else {
+                ctx.drawImage(this.logoImg, this.x, this.y, 400, 400);
+            }
+        }
+    },
+    setTeam(teamName) {
+        LoadTeamLogo(awayInfo, `/logos/away/${teamName.toLowerCase()}.png`, () => {
+            this.name = teamName;
+            draw();
+        });
     }
 };
 
@@ -23,9 +37,19 @@ const homeInfo = {
     x: 1725,
     y: 1000,
     logo: "/logos/home/broncos.png",
+    name: "Broncos",
     logoImg: null,
     draw() {
-        if (this.logoImg) ctx.drawImage(this.logoImg, this.x, this.y, 400, 400);
+        if (this.logoImg) {
+            if (this.name === "Eagles") ctx.drawImage(this.logoImg, this.x + 50, this.y + 50, 300, 300);
+            else ctx.drawImage(this.logoImg, this.x, this.y, 400, 400);
+        }
+    },
+    setTeam(teamName) {
+        LoadTeamLogo(homeInfo, `/logos/home/${teamName.toLowerCase()}.png`, () => {
+            this.name = teamName;
+            draw();
+        });
     }
 };
 
@@ -67,7 +91,7 @@ const awayTimeouts = {
         ctx.save();
         ctx.globalAlpha = this.alpha;
         if (this.pos) {
-            const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
+            let grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
             grad.addColorStop(0, GetLowGradient(this.back));
             grad.addColorStop(0.5, GetHighGradient(this.back));
             grad.addColorStop(1, GetLowGradient(this.back));
@@ -120,6 +144,10 @@ const awayTimeouts = {
             }
         }
         requestAnimationFrame(step);
+    },
+    setColor(col) {
+        this.back = col.toLowerCase();
+        draw();
     }
 };
 
@@ -137,7 +165,7 @@ const homeTimeouts = {
         ctx.save();
         ctx.globalAlpha = this.alpha;
         if (this.pos) {
-            const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
+            let grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
             grad.addColorStop(0, GetLowGradient(this.back));
             grad.addColorStop(0.5, GetHighGradient(this.back));
             grad.addColorStop(1, GetLowGradient(this.back));
@@ -190,6 +218,10 @@ const homeTimeouts = {
             }
         }
         requestAnimationFrame(step);
+    },
+    setColor(col) {
+        this.back = col.toLowerCase();
+        draw();
     }
 };
 
@@ -207,7 +239,7 @@ const awayDown = {
         if (this.alpha <= 0) return;
         ctx.save();
         ctx.globalAlpha = this.alpha;
-        const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
+        let grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
         grad.addColorStop(0, GetLowGradient(this.back));
         grad.addColorStop(0.5, GetHighGradient(this.back));
         grad.addColorStop(1, GetLowGradient(this.back));
@@ -281,7 +313,11 @@ const awayDown = {
 
             ctx.clearRect(self.x - 2, self.y - 2, self.w + 2 * 2, self.h + 2 * 2);
 
-            ctx.fillStyle = self.back;
+            let grad = ctx.createLinearGradient(self.x, self.y, self.x + 585, self.y + 40);
+            grad.addColorStop(0, GetLowGradient(self.back));
+            grad.addColorStop(0.5, GetHighGradient(self.back));
+            grad.addColorStop(1, GetLowGradient(self.back));
+            ctx.fillStyle = grad;
             ctx.fillRect(self.x, self.y, 585, 40);
             ctx.font = "40px italic";
             ctx.fillStyle = self.fore;
@@ -324,10 +360,10 @@ const awayDown = {
 
             ctx.clearRect(self.x - 2, self.y - 2, self.w + 2 * 2, self.h + 2 * 2);
 
-            const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
-            grad.addColorStop(0, GetLowGradient(this.back));
-            grad.addColorStop(0.5, GetHighGradient(this.back));
-            grad.addColorStop(1, GetLowGradient(this.back));
+            let grad = ctx.createLinearGradient(self.x, self.y, self.x + 585, self.y + 40);
+            grad.addColorStop(0, GetLowGradient(self.back));
+            grad.addColorStop(0.5, GetHighGradient(self.back));
+            grad.addColorStop(1, GetLowGradient(self.back));
             ctx.fillStyle = grad;
             ctx.fillRect(self.x, self.y, 585, 40);
             ctx.font = "40px italic";
@@ -353,6 +389,11 @@ const awayDown = {
         }
 
         requestAnimationFrame(stepOne);
+    },
+    setColors(prim, sec) {
+        this.back = prim.toLowerCase();
+        this.fore = sec.toLowerCase();
+        draw();
     }
 };
 
@@ -368,7 +409,7 @@ const homeDown = {
     alpha: 0,
     draw() {
         if (this.alpha <= 0) return;
-        const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
+        let grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
         grad.addColorStop(0, GetLowGradient(this.back));
         grad.addColorStop(0.5, GetHighGradient(this.back));
         grad.addColorStop(1, GetLowGradient(this.back));
@@ -444,10 +485,10 @@ const homeDown = {
             ctx.clearRect(self.x - 2, self.y - 2, self.w + 2 * 2, self.h + 2 * 2);
 
             //draw background and play clock
-            const grad = ctx.createLinearGradient(this.x, this.y, this.x + 585, this.y + 40);
-            grad.addColorStop(0, GetLowGradient(this.back));
-            grad.addColorStop(0.5, GetHighGradient(this.back));
-            grad.addColorStop(1, GetLowGradient(this.back));
+            let grad = ctx.createLinearGradient(self.x, self.y, self.x + 585, self.y + 40);
+            grad.addColorStop(0, GetLowGradient(self.back));
+            grad.addColorStop(0.5, GetHighGradient(self.back));
+            grad.addColorStop(1, GetLowGradient(self.back));
             ctx.fillStyle = grad;
             ctx.fillRect(self.x, self.y, 585, 40);
             ctx.font = "40px italic";
@@ -494,7 +535,11 @@ const homeDown = {
             ctx.clearRect(self.x - 2, self.y - 2, self.w + 2 * 2, self.h + 2 * 2);
 
             //draw background and play clock
-            ctx.fillStyle = self.back;
+            let grad = ctx.createLinearGradient(self.x, self.y, self.x + 585, self.y + 40);
+            grad.addColorStop(0, GetLowGradient(self.back));
+            grad.addColorStop(0.5, GetHighGradient(self.back));
+            grad.addColorStop(1, GetLowGradient(self.back));
+            ctx.fillStyle = grad;
             ctx.fillRect(self.x, self.y, 585, 40);
             ctx.font = "40px italic";
             ctx.fillStyle = self.fore;
@@ -520,6 +565,11 @@ const homeDown = {
         }
 
         requestAnimationFrame(stepOne);
+    },
+    setColors(prim, sec) {
+        this.back = prim.toLowerCase();
+        this.fore = sec.toLowerCase();
+        draw();
     }
 };
 
@@ -537,7 +587,7 @@ const specialDown = {
 
         ctx.save();
         ctx.globalAlpha = this.alpha;
-        const grad = ctx.createLinearGradient(this.x, this.y, this.x + 365, this.y + 40);
+        let grad = ctx.createLinearGradient(this.x, this.y, this.x + 365, this.y + 40);
         grad.addColorStop(0, GetLowGradient(this.text === "FLAG" ? "#fcdf03" : this.back));
         grad.addColorStop(0.5, GetHighGradient(this.text === "FLAG" ? "#fcdf03" : this.back));
         grad.addColorStop(1, GetLowGradient(this.text === "FLAG" ? "#fcdf03" : this.back));
@@ -656,6 +706,7 @@ function preloadLogos() {
 }
 
 function draw() {
+    ctx.clearRect(0, 0, 2560, 1440);
     bold.load();
     italic.load();
     awayTimeouts.draw();
@@ -699,6 +750,16 @@ socket.onmessage = (event) => {
             } else {
                 homeDown.changeDown(receivedMessage.down, receivedMessage.distance);
             }
+            break;
+        case "set-away-team":
+            awayInfo.setTeam(receivedMessage.teamName);
+            awayDown.setColors(receivedMessage.prim, receivedMessage.sec);
+            awayTimeouts.setColor(receivedMessage.prim);
+            break;
+        case "set-home-team":
+            homeInfo.setTeam(receivedMessage.teamName);
+            homeDown.setColors(receivedMessage.prim, receivedMessage.sec);
+            homeTimeouts.setColor(receivedMessage.prim);
             break;
     }
 }
@@ -829,4 +890,26 @@ function GetHighGradient(col) {
         }
     }
     return finalCol;
+}
+
+function LoadTeamLogo(team, newPath, callback) {
+    if (logoCache[newPath]) {
+        team.logo = newPath;
+        team.logoImg = logoCache[newPath];
+        callback?.();
+    } else {
+        const img = new Image();
+        img.src = newPath;
+        img.onload = () => {
+            logoCache[newPath] = img;
+            team.logo = newPath;
+            team.logoImg = img;
+            callback?.();
+        };
+
+        img.onerror = () => {
+            console.error(`Failed to load logo: ${newPath}`);
+            callback?.();
+        };
+    }
 }
